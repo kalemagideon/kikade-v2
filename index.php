@@ -641,7 +641,6 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="card-content">
         <h3 class="card-title"><?php echo htmlspecialchars($item['title']); ?></h3>
         <p class="card-subtitle">Sold by: <?php echo htmlspecialchars($item['seller']); ?></p>
-        <p class="card-text"><?php echo htmlspecialchars($item['description']); ?></p>
     </div>
     <div class="card-actions">
         <span class="price">Ugshs <?php echo number_format($item['price']); ?></span>
