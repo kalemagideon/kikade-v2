@@ -25,12 +25,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $description = $_POST['description'] ?? '';
     $price = $_POST['price'] ?? 0;
     $seller = $_POST['seller'] ?? 'Anonymous';
+    $category = $_POST['category'] ?? 'Other'; // Get the category
     
     // Validate inputs
     $errors = [];
     if (empty($title)) $errors[] = "Title is required";
     if (empty($description)) $errors[] = "Description is required";
     if (!is_numeric($price) || $price <= 0) $errors[] = "Valid price is required";
+    if (empty($category)) $errors[] = "Category is required";
     
     // Handle image upload
     $imagePath = '';
@@ -66,14 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     // If no errors, insert into database
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO items (title, description, price, seller, image_path, views, created_at) 
-                                  VALUES (:title, :description, :price, :seller, :image_path, 0, NOW())");
-            $stmt->execute([
-                ':title' => htmlspecialchars($title),
-                ':description' => htmlspecialchars($description),
-                ':price' => (float)$price,
-                ':seller' => htmlspecialchars($seller),
-                ':image_path' => $imagePath
+            $stmt = $pdo->prepare("INSERT INTO items (title, description, price, seller, image_path, views, category, created_at) 
+                          VALUES (:title, :description, :price, :seller, :image_path, 0, :category, NOW())");
+    $stmt->execute([
+        ':title' => htmlspecialchars($title),
+        ':description' => htmlspecialchars($description),
+        ':price' => (float)$price,
+        ':seller' => htmlspecialchars($seller),
+        ':image_path' => $imagePath,
+        ':category' => htmlspecialchars($category)
             ]);
             
             // Redirect to prevent form resubmission
@@ -175,22 +178,34 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         
         header {
-            background-color: var(--primary-color);
-            color: var(--on-primary);
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    height: 68px; /* Add this line */
+    background-color: var(--primary-color);
+    color: var(--on-primary);
+    padding: 0 20px; /* Changed from padding: 20px */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Mobile header height */
+@media (max-width: 600px) {
+    header {
+        height: 56px;
+        padding: 0 12px;
+    }
+}
         
         .logo {
             font-size: 24px;
@@ -463,13 +478,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             white-space: pre-line;
         }
         
-        .detail-modal-footer {
-            padding: 16px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        
         
         @media (min-width: 768px) {
             .detail-modal-body {
@@ -501,28 +510,67 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     white-space: nowrap; /* Prevent wrapping */
 }
 
-/* Add these to your existing CSS */
+.search-section {
+    background-color: white;
+    padding: 15px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 68px; /* Height of your header */
+    z-index: 90;
+}
+
 .search-container {
-    max-width: 500px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
 }
 
 .search-input {
-    background-color: white;
+    position: relative;
+    flex-grow: 1;
+    background-color: #f5f5f5;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
-.search-input input {
-    border: none;
-    outline: none;
-    padding: 10px 16px;
-    width: 100%;
+/* For mobile responsiveness */
+@media (max-width: 600px) {
+    .search-section {
+        top: 56px; /* Smaller header height on mobile */
+        padding: 10px 0;
+    }
+    
+    .search-form {
+        flex-direction: row;
+    }
+    
+    .search-input input {
+        padding: 8px 16px;
+        padding-right: 36px;
+    }
 }
+
 
 .search-results-count {
     margin: 10px 0;
     color: #666;
     font-size: 14px;
+}
+
+
+.item-category {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--primary-color);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 2;
 }
     </style>
 </head>
@@ -535,27 +583,34 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <span>Post Item</span>
             </button>
 
-            <!-- Search bar -->
-<div class="search-container" style="flex-grow: 1; margin: 0 20px;">
-    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" class="search-form" style="display: flex;">
-        <div class="search-input" style="position: relative; flex-grow: 1;">
-            <input type="text" name="search_query" placeholder="Search items..." 
-                   value="<?php echo htmlspecialchars($_GET['search_query'] ?? ''); ?>"
-                   style="width: 100%; padding: 10px 16px; padding-right: 40px; border: none; border-radius: 4px;">
-            <button type="submit" style="position: absolute; right: 0; top: 0; height: 100%; background: none; border: none; cursor: pointer;">
-                <i class="material-icons" style="color: #666;">search</i>
-            </button>
-        </div>
-        <?php if(isset($_GET['search_query']) && !empty($_GET['search_query'])): ?>
-            <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-flat" style="margin-left: 8px;">
-                Clear
-            </a>
-        <?php endif; ?>
-    </form>
-</div>
+            
+
         </div>
     </header>
     
+    <!-- Search Section -->
+<div class="search-section">
+    <div class="container">
+        <div class="search-container">
+            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" class="search-form">
+                <div class="search-input">
+                    <input type="text" name="search_query" placeholder="Tap here to Search items..." 
+                           value="<?php echo htmlspecialchars($_GET['search_query'] ?? ''); ?>"
+                           style="width: 100%; padding: 10px 16px; padding-right: 40px; border: none; border-radius: 4px;">
+                    <button type="submit" style="position: absolute; right: 0; top: 0; height: 100%; background: none; border: none; cursor: pointer;">
+                        <i class="material-icons" style="color: #666;">search</i>
+                    </button>
+                </div>
+                <?php if(isset($_GET['search_query']) && !empty($_GET['search_query'])): ?>
+                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-flat" style="margin-left: 8px;">
+                        Clear
+                    </a>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
+</div>
+
     <div class="container">
 
                 <!-- Add this right before the grid starts -->
@@ -569,34 +624,38 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <!-- Your existing grid starts here -->
                 <div class="grid">
                     <?php foreach ($items as $item): ?>
-                        <!-- your item cards -->
+                        <div class="card" data-id="<?php echo $item['id']; ?>">
+    <div style="position: relative;"> <!-- Add this wrapper div -->
+        <?php if ($item['image_path']): ?>
+            <img src="<?php echo htmlspecialchars($item['image_path']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="card-image">
+        <?php else: ?>
+            <div style="height: 200px; background-color: #eee; display: flex; align-items: center; justify-content: center;">
+                <i class="material-icons" style="font-size: 48px; color: #999;">photo</i>
+            </div>
+        <?php endif; ?>
+        <!-- Category badge - moved inside the wrapper div -->
+        <div class="item-category">
+            <?php echo htmlspecialchars($item['category'] ?? 'Other'); ?>
+        </div>
+    </div>
+    <div class="card-content">
+        <h3 class="card-title"><?php echo htmlspecialchars($item['title']); ?></h3>
+        <p class="card-subtitle">Sold by: <?php echo htmlspecialchars($item['seller']); ?></p>
+        <p class="card-text"><?php echo htmlspecialchars($item['description']); ?></p>
+    </div>
+    <div class="card-actions">
+        <span class="price">Ugshs <?php echo number_format($item['price']); ?></span>
+        <div class="view-count">
+            <i class="material-icons">visibility</i>
+            <span><?php echo $item['views']; ?></span>
+        </div>
+    </div>
+</div>
+
                     <?php endforeach; ?>
                 </div>
 
-        <div class="grid">
-            <?php foreach ($items as $item): ?>
-                <div class="card" data-id="<?php echo $item['id']; ?>">
-                    <?php if ($item['image_path']): ?>
-                        <img src="<?php echo htmlspecialchars($item['image_path']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="card-image">
-                    <?php else: ?>
-                        <div style="height: 200px; background-color: #eee; display: flex; align-items: center; justify-content: center;">
-                            <i class="material-icons" style="font-size: 48px; color: #999;">photo</i>
-                        </div>
-                    <?php endif; ?>
-                    <div class="card-content">
-                        <h3 class="card-title"><?php echo htmlspecialchars($item['title']); ?></h3>
-                        <p class="card-subtitle">Sold by: <?php echo htmlspecialchars($item['seller']); ?></p>
-                        <p class="card-text"><?php echo htmlspecialchars($item['description']); ?></p>
-                    </div>
-                    <div class="card-actions">
-                    <span class="price">Ugshs <?php echo number_format($item['price']); ?></span>
-                        <div class="view-count">
-                            <i class="material-icons">visibility</i>
-                            <span><?php echo $item['views']; ?></span>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+        
             
             <?php if (empty($items)): ?>
                 <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
@@ -626,8 +685,21 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
             </div>
             <div class="form-group">
-            <label for="price" class="form-label">Price (Ugshs)*</label>
+                <label for="price" class="form-label">Price (Ugshs)*</label>
                 <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="category" class="form-label">Category*</label>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="">Select a category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Cameras">Cameras</option>
+                    <option value="Phones">Phones</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Home Appliances">Home Appliances</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="seller" class="form-label">Your Name</label>
@@ -682,12 +754,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
             </div>
-            <div class="detail-modal-footer">
-                <button class="btn btn-flat close-detail-modal">Close</button>
-                <button class="btn btn-primary">
-                    <i class="material-icons">message</i> Contact Seller
-                </button>
-            </div>
+            
         </div>
     </div>
 
