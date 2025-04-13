@@ -612,6 +612,43 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     font-size: 12px;
     z-index: 2;
 }
+
+
+/* Loading spinner styles */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 4px;
+    }
+}
     </style>
 </head>
 <body>
@@ -629,10 +666,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </header>
     
     <!-- Search Section -->
-<div class="search-section">
+    <div class="search-section">
     <div class="container">
         <div class="search-container">
-            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" class="search-form">
+            <form id="searchForm" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" class="search-form">
                 <div class="search-input">
                     <input type="text" name="search_query" placeholder="Tap here to Search items..." 
                            value="<?php echo htmlspecialchars($_GET['search_query'] ?? ''); ?>"
@@ -797,7 +834,9 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+    <div class="spinner"></div>
+    </div>
               
 <script>
     // Modal functionality - fixed version
@@ -892,13 +931,22 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
         // Add search functionality enhancements
+// Add search functionality enhancements
 document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.querySelector('.search-form');
+    const searchForm = document.getElementById('searchForm');
     const searchInput = document.querySelector('input[name="search_query"]');
+    const loadingSpinner = document.getElementById('loadingSpinner');
     
     // Focus on search input when page loads if there's a search query
     if (searchInput.value) {
         searchInput.focus();
+    }
+    
+    // Show loading spinner when form submits
+    if (searchForm) {
+        searchForm.addEventListener('submit', function() {
+            loadingSpinner.style.display = 'flex';
+        });
     }
     
     // Optional: Add live search with debounce
@@ -906,12 +954,18 @@ document.addEventListener('DOMContentLoaded', function() {
         let searchTimer;
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(function() {
-                if (searchInput.value.length > 2 || searchInput.value.length === 0) {
+            if (searchInput.value.length > 2 || searchInput.value.length === 0) {
+                loadingSpinner.style.display = 'flex';
+                searchTimer = setTimeout(function() {
                     searchForm.submit();
-                }
-            }, 500);
+                }, 500);
+            }
         });
     }
+    
+    // Hide spinner when page finishes loading (in case of back navigation)
+    window.addEventListener('load', function() {
+        loadingSpinner.style.display = 'none';
+    });
 });
 </script>
