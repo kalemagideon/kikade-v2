@@ -1,4 +1,9 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
 // Database connection
 $host = 'sql109.infinityfree.com';
 $dbname = 'if0_38595302_ecommerce_app';
@@ -11,12 +16,49 @@ try {
 } catch (PDOException $e) {
     die("Could not connect to the database: " . $e->getMessage());
 }
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Could not connect to the database: " . $e->getMessage());
+// Function to compress and resize image
+/**
+ * Compresses and resizes an image
+ */
+function compressImage($source, $destination, $quality) {
+    $info = getimagesize($source);
+    
+    if ($info['mime'] == 'image/jpeg') {
+        $image = imagecreatefromjpeg($source);
+    } elseif ($info['mime'] == 'image/png') {
+        $image = imagecreatefrompng($source);
+    } elseif ($info['mime'] == 'image/gif') {
+        $image = imagecreatefromgif($source);
+    } else {
+        return false;
+    }
+    
+    // Calculate new dimensions (max width: 800px)
+    $maxWidth = 800;
+    $width = imagesx($image);
+    $height = imagesy($image);
+    
+    if ($width > $maxWidth) {
+        $ratio = $maxWidth / $width;
+        $newWidth = $maxWidth;
+        $newHeight = $height * $ratio;
+        
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        $image = $newImage;
+    }
+    
+    // Save the compressed image
+    if ($info['mime'] == 'image/jpeg') {
+        imagejpeg($image, $destination, $quality);
+    } elseif ($info['mime'] == 'image/png') {
+        imagepng($image, $destination, round(9 * $quality / 100)); // PNG quality is 0-9
+    } elseif ($info['mime'] == 'image/gif') {
+        imagegif($image, $destination);
+    }
+    
+    imagedestroy($image);
+    return true;
 }
 
 // Handle form submission
@@ -35,35 +77,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (empty($category)) $errors[] = "Category is required";
     
     // Handle image upload
-    $imagePath = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+// Handle image upload
+$imagePath = '';
+if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = 'uploads/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Validate image type
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($fileInfo, $_FILES['image']['tmp_name']);
+    
+    if (!in_array($mimeType, $allowedTypes)) {
+        $errors[] = "Only JPG, PNG, and GIF files are allowed";
+    } else {
+        $filename = uniqid() . '_' . basename($_FILES['image']['name']);
+        $targetPath = $uploadDir . $filename;
         
-        // Validate image
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        $maxSize = 2 * 1024 * 1024; // 2MB
-        
-        $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($fileInfo, $_FILES['image']['tmp_name']);
-        
-        if (!in_array($mimeType, $allowedTypes)) {
-            $errors[] = "Only JPG, PNG, and GIF files are allowed";
-        } elseif ($_FILES['image']['size'] > $maxSize) {
-            $errors[] = "File size must be less than 2MB";
+        // Compress and resize the image
+        if (compressImage($_FILES['image']['tmp_name'], $targetPath, 50)) {
+            $imagePath = $targetPath;
         } else {
-            $filename = uniqid() . '_' . basename($_FILES['image']['name']);
-            $targetPath = $uploadDir . $filename;
-            
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                $imagePath = $targetPath;
-            } else {
-                $errors[] = "Failed to upload image";
-            }
+            $errors[] = "Failed to process image";
         }
     }
+}
     
     // If no errors, insert into database
     if (empty($errors)) {
@@ -707,7 +747,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="form-group">
                 <label for="image" class="form-label">Item Image</label>
                 <input type="file" id="image" name="image" class="form-control" accept="image/*">
-                <small class="form-text">Max size: 2MB (JPEG, PNG, GIF)</small>
+                <small class="form-text">Images will be automatically resized (max width: 800px)</small>
             </div>
             <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                 <button type="button" class="btn btn-flat close-btn">Cancel</button>
