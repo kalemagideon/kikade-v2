@@ -14,18 +14,7 @@ try {
 
 // Define available categories
 $categories = [
-    // Electronics
-    'Smartphones',
-    'Laptops',
-    'Tablets',
-    'Cameras',
-    'Televisions',
-    'Headphones',
-    'Speakers',
-    'Smart Watches',
-    'Gaming Consoles',
-    'Computer Accessories',
-    
+ 
     // Fashion
     "Men's Clothing",
     "Women's Clothing",
