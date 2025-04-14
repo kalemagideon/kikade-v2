@@ -14,12 +14,80 @@ try {
 
 // Define available categories
 $categories = [
-    'Electronics',
+    // Electronics
+    'Smartphones',
+    'Laptops',
+    'Tablets',
     'Cameras',
-    'Phones',
+    'Televisions',
+    'Headphones',
+    'Speakers',
+    'Smart Watches',
+    'Gaming Consoles',
+    'Computer Accessories',
+    
+    // Fashion
+    "Men's Clothing",
+    "Women's Clothing",
+    "Kids' Clothing",
+    'Shoes',
+    'Bags & Wallets',
+    'Jewelry',
+    'Watches',
+    'Sunglasses',
+    
+    // Home & Kitchen
     'Furniture',
     'Home Appliances',
-    'Fashion',
+    'Kitchen Appliances',
+    'Bedding',
+    'Home Decor',
+    'Lighting',
+    'Cookware',
+    'Tableware',
+    
+    // Health & Beauty
+    'Skincare',
+    'Hair Care',
+    'Makeup',
+    'Fragrances',
+    'Personal Care',
+    'Health Care',
+    'Vitamins',
+    
+    // Sports & Outdoors
+    'Exercise Equipment',
+    'Sports Apparel',
+    'Outdoor Gear',
+    'Cycling',
+    'Team Sports',
+    'Fitness Accessories',
+    
+    // Agricultural Produce
+    'Fresh Vegetables',
+    'Fresh Fruits',
+    'Grains & Cereals',
+    'Legumes & Pulses',
+    'Tubers & Roots',
+    'Dairy Products',
+    'Poultry & Eggs',
+    'Livestock',
+    'Seeds & Seedlings',
+    'Fertilizers',
+    'Farm Tools',
+    'Organic Produce',
+    'Processed Farm Products',
+    'Herbs & Spices',
+    'Flowers & Plants',
+    
+    // Other Categories
+    'Books',
+    'Toys & Games',
+    'Baby Products',
+    'Pet Supplies',
+    'Automotive',
+    'Tools & Home Improvement',
+    'Office Supplies',
     'Other'
 ];
 
@@ -412,6 +480,105 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 margin-bottom: 10px;
             }
         }
+
+
+        /* Category badge colors */
+.category-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-top: 5px;
+    color: white;
+}
+
+/* Electronics */
+[data-category="Smartphones"],
+[data-category="Laptops"],
+[data-category="Tablets"],
+[data-category="Cameras"],
+[data-category="Televisions"],
+[data-category="Headphones"],
+[data-category="Speakers"],
+[data-category="Smart Watches"],
+[data-category="Gaming Consoles"],
+[data-category="Computer Accessories"] {
+    background-color: #3f51b5;
+}
+
+/* Fashion */
+[data-category*="Clothing"],
+[data-category="Shoes"],
+[data-category="Bags & Wallets"],
+[data-category="Jewelry"],
+[data-category="Watches"],
+[data-category="Sunglasses"] {
+    background-color: #e91e63;
+}
+
+/* Home & Kitchen */
+[data-category="Furniture"],
+[data-category="Home Appliances"],
+[data-category="Kitchen Appliances"],
+[data-category="Bedding"],
+[data-category="Home Decor"],
+[data-category="Lighting"],
+[data-category="Cookware"],
+[data-category="Tableware"] {
+    background-color: #ff5722;
+}
+
+/* Health & Beauty */
+[data-category="Skincare"],
+[data-category="Hair Care"],
+[data-category="Makeup"],
+[data-category="Fragrances"],
+[data-category="Personal Care"],
+[data-category="Health Care"],
+[data-category="Vitamins"] {
+    background-color: #9c27b0;
+}
+
+/* Sports & Outdoors */
+[data-category="Exercise Equipment"],
+[data-category="Sports Apparel"],
+[data-category="Outdoor Gear"],
+[data-category="Cycling"],
+[data-category="Team Sports"],
+[data-category="Fitness Accessories"] {
+    background-color: #009688;
+}
+
+/* Agricultural Produce */
+[data-category="Fresh Vegetables"],
+[data-category="Fresh Fruits"],
+[data-category="Grains & Cereals"],
+[data-category="Legumes & Pulses"],
+[data-category="Tubers & Roots"],
+[data-category="Dairy Products"],
+[data-category="Poultry & Eggs"],
+[data-category="Livestock"],
+[data-category="Seeds & Seedlings"],
+[data-category="Fertilizers"],
+[data-category="Farm Tools"],
+[data-category="Organic Produce"],
+[data-category="Processed Farm Products"],
+[data-category="Herbs & Spices"],
+[data-category="Flowers & Plants"] {
+    background-color: #4caf50;
+}
+
+/* Other Categories */
+[data-category="Books"],
+[data-category="Toys & Games"],
+[data-category="Baby Products"],
+[data-category="Pet Supplies"],
+[data-category="Automotive"],
+[data-category="Tools & Home Improvement"],
+[data-category="Office Supplies"],
+[data-category="Other"] {
+    background-color: #607d8b;
+}
     </style>
 </head>
 <body>

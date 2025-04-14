@@ -649,6 +649,34 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         border-width: 4px;
     }
 }
+
+/* Category dropdown styling */
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+    padding-right: 2.5em;
+}
+
+optgroup {
+    font-weight: bold;
+    font-style: normal;
+    color: var(--primary-color);
+}
+
+option {
+    padding: 8px 12px;
+    font-weight: normal;
+}
+
+select.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2);
+}
     </style>
 </head>
 <body>
@@ -765,18 +793,103 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required>
             </div>
             <div class="form-group">
-                <label for="category" class="form-label">Category*</label>
-                <select id="category" name="category" class="form-control" required>
-                    <option value="">Select a category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Cameras">Cameras</option>
-                    <option value="Phones">Phones</option>
-                    <option value="Furniture">Furniture</option>
-                    <option value="Home Appliances">Home Appliances</option>
-                    <option value="Fashion">Fashion</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+    <label for="category" class="form-label">Category*</label>
+    <select id="category" name="category" class="form-control" required>
+        <option value="">Select a category</option>
+        
+        <!-- Electronics -->
+        <optgroup label="Electronics">
+            <option value="Smartphones">Smartphones</option>
+            <option value="Laptops">Laptops</option>
+            <option value="Tablets">Tablets</option>
+            <option value="Cameras">Cameras</option>
+            <option value="Televisions">Televisions</option>
+            <option value="Headphones">Headphones</option>
+            <option value="Speakers">Speakers</option>
+            <option value="Smart Watches">Smart Watches</option>
+            <option value="Gaming Consoles">Gaming Consoles</option>
+            <option value="Computer Accessories">Computer Accessories</option>
+        </optgroup>
+        
+        <!-- Fashion -->
+        <optgroup label="Fashion">
+            <option value="Men's Clothing">Mens Clothing</option>
+            <option value="Women's Clothing">Womens Clothing</option>
+            <option value="Kids' Clothing">Kids Clothing</option>
+            <option value="Shoes">Shoes</option>
+            <option value="Bags & Wallets">Bags & Wallets</option>
+            <option value="Jewelry">Jewelry</option>
+            <option value="Watches">Watches</option>
+            <option value="Sunglasses">Sunglasses</option>
+        </optgroup>
+        
+        <!-- Home & Kitchen -->
+        <optgroup label="Home & Kitchen">
+            <option value="Furniture">Furniture</option>
+            <option value="Home Appliances">Home Appliances</option>
+            <option value="Kitchen Appliances">Kitchen Appliances</option>
+            <option value="Bedding">Bedding</option>
+            <option value="Home Decor">Home Decor</option>
+            <option value="Lighting">Lighting</option>
+            <option value="Cookware">Cookware</option>
+            <option value="Tableware">Tableware</option>
+        </optgroup>
+        
+
+        <!-- Agricultural Produce -->
+            <optgroup label="Agricultural Produce">
+                <option value="Fresh Vegetables">Fresh Vegetables</option>
+                <option value="Fresh Fruits">Fresh Fruits</option>
+                <option value="Grains & Cereals">Grains & Cereals</option>
+                <option value="Legumes & Pulses">Legumes & Pulses</option>
+                <option value="Tubers & Roots">Tubers & Roots</option>
+                <option value="Dairy Products">Dairy Products</option>
+                <option value="Poultry & Eggs">Poultry & Eggs</option>
+                <option value="Livestock">Livestock</option>
+                <option value="Seeds & Seedlings">Seeds & Seedlings</option>
+                <option value="Fertilizers">Fertilizers</option>
+                <option value="Farm Tools">Farm Tools</option>
+                <option value="Organic Produce">Organic Produce</option>
+                <option value="Processed Farm Products">Processed Farm Products</option>
+                <option value="Herbs & Spices">Herbs & Spices</option>
+                <option value="Flowers & Plants">Flowers & Plants</option>
+            </optgroup>
+
+            
+        <!-- Health & Beauty -->
+        <optgroup label="Health & Beauty">
+            <option value="Skincare">Skincare</option>
+            <option value="Hair Care">Hair Care</option>
+            <option value="Makeup">Makeup</option>
+            <option value="Fragrances">Fragrances</option>
+            <option value="Personal Care">Personal Care</option>
+            <option value="Health Care">Health Care</option>
+            <option value="Vitamins">Vitamins</option>
+        </optgroup>
+        
+        <!-- Sports & Outdoors -->
+        <optgroup label="Sports & Outdoors">
+            <option value="Exercise Equipment">Exercise Equipment</option>
+            <option value="Sports Apparel">Sports Apparel</option>
+            <option value="Outdoor Gear">Outdoor Gear</option>
+            <option value="Cycling">Cycling</option>
+            <option value="Team Sports">Team Sports</option>
+            <option value="Fitness Accessories">Fitness Accessories</option>
+        </optgroup>
+        
+        <!-- Other Categories -->
+        <optgroup label="Other Categories">
+            <option value="Books">Books</option>
+            <option value="Toys & Games">Toys & Games</option>
+            <option value="Baby Products">Baby Products</option>
+            <option value="Pet Supplies">Pet Supplies</option>
+            <option value="Automotive">Automotive</option>
+            <option value="Tools & Home Improvement">Tools & Home Improvement</option>
+            <option value="Office Supplies">Office Supplies</option>
+            <option value="Other">Other</option>
+        </optgroup>
+    </select>
+</div>
             <div class="form-group">
                 <label for="seller" class="form-label">Your Name</label>
                 <input type="text" id="seller" name="seller" class="form-control" placeholder="Anonymous">
@@ -839,6 +952,8 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
               
 <script>
+document.addEventListener('DOMContentLoaded', addCategoryIcons);
+
     // Modal functionality - fixed version
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('postModal');
